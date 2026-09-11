@@ -17,5 +17,10 @@ namespace MarketplaceManagerWeb.Models
         [Required]
         [Column(TypeName = "decimal(5,2)")]
         public decimal CommissionRate { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
+        [Display(Name = "Стоимость логистики (руб.)")]
+        public decimal LogisticsCost { get; set; } = 0;
     }
 }

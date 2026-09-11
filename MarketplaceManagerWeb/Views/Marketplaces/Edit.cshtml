@@ -20,10 +20,17 @@
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CommissionRate" class="control-label">Комиссия (%)</label>
-                    <input asp-for="CommissionRate" class="form-control" type="number" step="0.01" min="0" max="100" />
-                    <span asp-validation-for="CommissionRate" class="text-danger"></span>
-                </div>
+    <label asp-for="CommissionRate" class="control-label">Комиссия (%)</label>
+    <input asp-for="CommissionRate" class="form-control" type="number" step="0.01" min="0" max="100" />
+    <span asp-validation-for="CommissionRate" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="LogisticsCost" class="control-label">Стоимость логистики (руб.)</label>
+    <input asp-for="LogisticsCost" class="form-control" type="number" step="0.01" min="0" />
+    <span asp-validation-for="LogisticsCost" class="text-danger"></span>
+    <small class="form-text text-muted">Средняя стоимость доставки одной единицы товара</small>
+</div>
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Сохранить</button>

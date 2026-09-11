@@ -38,6 +38,11 @@ namespace MarketplaceManagerWeb.Controllers
             ViewBag.Marketplaces = await _context.Marketplaces
                 .OrderBy(m => m.MarketplaceName)
                 .ToListAsync();
+            // Добавляем список менеджеров
+            ViewBag.Managers = await _context.Managers
+                .OrderBy(m => m.ManagerLName)
+                .ThenBy(m => m.ManagerFName)
+                .ToListAsync();
 
             return View();
         }
@@ -45,17 +50,18 @@ namespace MarketplaceManagerWeb.Controllers
         // POST: Sales/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,MarketplaceID,Quantity")] Sale sale)
+        public async Task<IActionResult> Create([Bind("SaleDate,ManagerID,ProductID,MarketplaceID,Quantity")] Sale sale)
         {
             if (ModelState.IsValid)
             {
-                // Получаем данные о товаре и маркетплейсе
+                // Получаем данные о товаре, маркетплейсе и менеджере
                 var product = await _context.Products.FindAsync(sale.ProductID);
                 var marketplace = await _context.Marketplaces.FindAsync(sale.MarketplaceID);
+                var manager = await _context.Managers.FindAsync(sale.ManagerID);
 
-                if (product == null || marketplace == null)
+                if (product == null || marketplace == null || manager == null)
                 {
-                    ModelState.AddModelError("", "Товар или маркетплейс не найдены");
+                    ModelState.AddModelError("", "Товар, маркетплейс или менеджер не найдены");
                     return View(sale);
                 }
 
@@ -66,15 +72,22 @@ namespace MarketplaceManagerWeb.Controllers
                     return View(sale);
                 }
 
-                // Заглушка для менеджера (в будущем будет из сессии)
-                var manager = await _context.Managers.FirstAsync();
+                // Если дата не указана или некорректна, ставим текущую дату
+                if (sale.SaleDate == default || sale.SaleDate.Year < 2000)
+                {
+                    sale.SaleDate = DateTime.Now;
+                }
+                else
+                {
+                    // Оставляем только дату, без времени, для чистоты данных
+                    sale.SaleDate = sale.SaleDate.Date;
+                }
 
                 // Рассчитываем финансовые показатели
-                sale.SaleDate = DateTime.Now;
-                sale.ManagerID = manager.ManagerID;
                 sale.TotalAmount = product.Price * sale.Quantity;
                 sale.Commission = sale.TotalAmount * marketplace.CommissionRate / 100;
-                sale.NetProfit = sale.TotalAmount - sale.Commission;
+                sale.LogisticsCost = marketplace.LogisticsCost * sale.Quantity;
+                sale.NetProfit = sale.TotalAmount - sale.Commission - (product.CostPrice * sale.Quantity) - sale.LogisticsCost;
 
                 // Уменьшаем остаток товара
                 product.Stock -= sale.Quantity;
@@ -94,6 +107,11 @@ namespace MarketplaceManagerWeb.Controllers
 
             ViewBag.Marketplaces = await _context.Marketplaces
                 .OrderBy(m => m.MarketplaceName)
+                .ToListAsync();
+
+            ViewBag.Managers = await _context.Managers
+                .OrderBy(m => m.ManagerLName)
+                .ThenBy(m => m.ManagerFName)
                 .ToListAsync();
 
             return View(sale);

@@ -10,8 +10,9 @@ namespace MarketplaceManagerWeb.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SaleID { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Дата продажи обязательна")]
         [DataType(DataType.Date)]
+        [Display(Name = "Дата продажи")]
         public DateTime SaleDate { get; set; }
 
         [Required]
@@ -42,6 +43,10 @@ namespace MarketplaceManagerWeb.Models
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal Commission { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal LogisticsCost { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]

@@ -26,7 +26,7 @@ namespace MarketplaceManagerWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MarketplaceName,CommissionRate")] Marketplace marketplace)
+        public async Task<IActionResult> Create([Bind("MarketplaceName,CommissionRate,LogisticsCost")] Marketplace marketplace)
         {
             var exists = await _context.Marketplaces
                 .AnyAsync(m => m.MarketplaceName == marketplace.MarketplaceName);
@@ -54,7 +54,7 @@ namespace MarketplaceManagerWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MarketplaceID,MarketplaceName,CommissionRate")] Marketplace marketplace)
+        public async Task<IActionResult> Edit(int id, [Bind("MarketplaceID,MarketplaceName,CommissionRate,LogisticsCost")] Marketplace marketplace)
         {
             if (id != marketplace.MarketplaceID) return NotFound();
 

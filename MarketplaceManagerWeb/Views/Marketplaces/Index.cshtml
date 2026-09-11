@@ -20,25 +20,27 @@
 
     <table class="table table-striped table-hover">
         <thead class="table-dark">
-            <tr>
-                <th>Название</th>
-                <th>Комиссия (%)</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
+    <tr>
+        <th>Название</th>
+        <th>Комиссия (%)</th>
+        <th>Логистика (руб.)</th>
+        <th>Действия</th>
+    </tr>
+</thead>
+<tbody>
             @foreach (var item in Model)
             {
-                    <tr>
-                        <td><strong>@item.MarketplaceName</strong></td>
-                        <td>@item.CommissionRate%</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.MarketplaceID" class="btn btn-sm btn-outline-primary">Изменить</a>
-                            <a asp-action="Delete" asp-route-id="@item.MarketplaceID" class="btn btn-sm btn-outline-danger">Удалить</a>
-                        </td>
-                    </tr>
+            <tr>
+                <td><strong>@item.MarketplaceName</strong></td>
+                <td>@item.CommissionRate%</td>
+                <td>@item.LogisticsCost.ToString("N2") ₽</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.MarketplaceID" class="btn btn-sm btn-outline-primary">Изменить</a>
+                    <a asp-action="Delete" asp-route-id="@item.MarketplaceID" class="btn btn-sm btn-outline-danger">Удалить</a>
+                </td>
+            </tr>
             }
-        </tbody>
+</tbody>
     </table>
 
     @if (!Model.Any())

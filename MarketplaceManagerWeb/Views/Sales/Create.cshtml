@@ -14,14 +14,44 @@
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                <!-- Выбор даты продажи -->
+<div class="mb-3">
+    <label asp-for="SaleDate" class="control-label">Дата продажи</label>
+    <!-- Устанавливаем значение по умолчанию на сегодня -->
+    <input asp-for="SaleDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+    <span asp-validation-for="SaleDate" class="text-danger"></span>
+    <small class="form-text text-muted">Если не указано, будет установлена текущая дата</small>
+</div>
+
+                <!-- Выбор менеджера -->
+                <div class="mb-3">
+                    <label asp-for="ManagerID" class="control-label">Менеджер</label>
+                    <select asp-for="ManagerID" class="form-select" required>
+                        <option value="">-- Выберите менеджера --</option>
+                        @foreach (var manager in ViewBag.Managers as List<MarketplaceManagerWeb.Models.Manager>)
+                        {
+                                <option value="@manager.ManagerID">
+                                @manager.ManagerLName @manager.ManagerFName @manager.ManagerMName
+                                @if (manager.ManagerIsAdmin)
+                                {
+                                    <text>(Администратор)</text>
+                                }
+                                </option>
+                        }
+                    </select>
+                    <span asp-validation-for="ManagerID" class="text-danger"></span>
+                </div>
+
+                <!-- Выбор товара -->
                 <div class="mb-3">
                     <label asp-for="ProductID" class="control-label">Товар</label>
-                    <select asp-for="ProductID" class="form-select" id="productSelect">
+                    <select asp-for="ProductID" class="form-select" id="productSelect" required>
                         <option value="">-- Выберите товар --</option>
                         @foreach (var product in products)
                         {
                                 <option value="@product.ProductID" 
                                         data-price="@product.Price"
+                                        data-cost-price="@product.CostPrice"
                                         data-stock="@product.Stock">
                                 @product.ProductName (Артикул: @product.ProductArticle, Остаток: @product.Stock)
                                 </option>
@@ -30,36 +60,45 @@
                     <span asp-validation-for="ProductID" class="text-danger"></span>
                 </div>
 
+                <!-- Выбор маркетплейса -->
                 <div class="mb-3">
                     <label asp-for="MarketplaceID" class="control-label">Маркетплейс</label>
-                    <select asp-for="MarketplaceID" class="form-select" id="marketplaceSelect">
+                    <select asp-for="MarketplaceID" class="form-select" id="marketplaceSelect" required>
                         <option value="">-- Выберите маркетплейс --</option>
                         @foreach (var marketplace in marketplaces)
                         {
                                 <option value="@marketplace.MarketplaceID" 
-                                        data-commission="@marketplace.CommissionRate">
-                                @marketplace.MarketplaceName (Комиссия: @marketplace.CommissionRate%)
+                                        data-commission="@marketplace.CommissionRate"
+                                        data-logistics="@marketplace.LogisticsCost">
+                                @marketplace.MarketplaceName (Комиссия: @marketplace.CommissionRate%, Логистика: @marketplace.LogisticsCost ₽)
                                 </option>
                         }
                     </select>
                     <span asp-validation-for="MarketplaceID" class="text-danger"></span>
                 </div>
 
+                <!-- Количество -->
                 <div class="mb-3">
                     <label asp-for="Quantity" class="control-label">Количество</label>
-                    <input asp-for="Quantity" class="form-control" id="quantityInput" min="1" value="1" />
+                    <input asp-for="Quantity" class="form-control" id="quantityInput" min="1" value="1" required />
                     <span asp-validation-for="Quantity" class="text-danger"></span>
                 </div>
 
+                <!-- Блок расчета -->
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Расчет</h5>
+                        <h5 class="card-title">Расчет прибыли</h5>
                         <p class="mb-1">Цена за единицу: <span id="priceDisplay">0.00</span> руб.</p>
-                        <p class="mb-1">Комиссия: <span id="commissionRateDisplay">0</span>%</p>
+                        <p class="mb-1">Себестоимость за единицу: <span id="costPriceDisplay">0.00</span> руб.</p>
+                        <p class="mb-1">Комиссия маркетплейса: <span id="commissionRateDisplay">0</span>%</p>
+                        <p class="mb-1">Логистика за единицу: <span id="logisticsPerUnitDisplay">0.00</span> руб.</p>
                         <hr />
-                        <p class="mb-1 fw-bold">Итого: <span id="totalDisplay">0.00</span> руб.</p>
+                        <p class="mb-1 fw-bold">Выручка: <span id="totalDisplay">0.00</span> руб.</p>
                         <p class="mb-1 text-danger">Комиссия: <span id="commissionDisplay">0.00</span> руб.</p>
-                        <p class="mb-0 text-success fw-bold">Чистая прибыль: <span id="profitDisplay">0.00</span> руб.</p>
+                        <p class="mb-1 text-danger">Себестоимость товара: <span id="totalCostDisplay">0.00</span> руб.</p>
+                        <p class="mb-1 text-danger">Общая логистика: <span id="logisticsCostDisplay">0.00</span> руб.</p>
+                        <hr />
+                        <p class="mb-0 text-success fw-bold fs-5">Чистая прибыль: <span id="profitDisplay">0.00</span> руб.</p>
                     </div>
                 </div>
 
@@ -79,9 +118,13 @@
             const quantityInput = document.getElementById('quantityInput');
 
             const priceDisplay = document.getElementById('priceDisplay');
+            const costPriceDisplay = document.getElementById('costPriceDisplay');
             const commissionRateDisplay = document.getElementById('commissionRateDisplay');
+            const logisticsPerUnitDisplay = document.getElementById('logisticsPerUnitDisplay');
             const totalDisplay = document.getElementById('totalDisplay');
             const commissionDisplay = document.getElementById('commissionDisplay');
+            const totalCostDisplay = document.getElementById('totalCostDisplay');
+            const logisticsCostDisplay = document.getElementById('logisticsCostDisplay');
             const profitDisplay = document.getElementById('profitDisplay');
 
             function calculateTotals() {
@@ -90,16 +133,24 @@
                 const quantity = parseInt(quantityInput.value) || 0;
 
                 const price = parseFloat(selectedProduct?.dataset.price || 0);
+                const costPrice = parseFloat(selectedProduct?.dataset.costPrice || 0);
                 const commissionRate = parseFloat(selectedMarketplace?.dataset.commission || 0);
+                const logisticsPerUnit = parseFloat(selectedMarketplace?.dataset.logistics || 0);
 
                 const total = price * quantity;
+                const totalCost = costPrice * quantity;
                 const commission = total * commissionRate / 100;
-                const profit = total - commission;
+                const totalLogistics = logisticsPerUnit * quantity;
+                const profit = total - commission - totalCost - totalLogistics;
 
                 priceDisplay.textContent = price.toFixed(2);
+                costPriceDisplay.textContent = costPrice.toFixed(2);
                 commissionRateDisplay.textContent = commissionRate;
+                logisticsPerUnitDisplay.textContent = logisticsPerUnit.toFixed(2);
                 totalDisplay.textContent = total.toFixed(2);
                 commissionDisplay.textContent = commission.toFixed(2);
+                totalCostDisplay.textContent = totalCost.toFixed(2);
+                logisticsCostDisplay.textContent = totalLogistics.toFixed(2);
                 profitDisplay.textContent = profit.toFixed(2);
             }
 

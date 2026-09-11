@@ -23,6 +23,11 @@ namespace MarketplaceManagerWeb.Models
         public decimal Price { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(10,2)")]
+        [Display(Name = "Себестоимость")]
+        public decimal CostPrice { get; set; }
+
+        [Required]
         public int Stock { get; set; }
     }
 }

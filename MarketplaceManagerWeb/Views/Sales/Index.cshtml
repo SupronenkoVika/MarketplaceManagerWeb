@@ -22,6 +22,7 @@
                 <th>Кол-во</th>
                 <th>Сумма</th>
                 <th>Комиссия</th>
+                <th>Логистика</th> <!-- Добавила заголовок -->
                 <th>Чистая прибыль</th>
             </tr>
         </thead>
@@ -36,6 +37,7 @@
                         <td>@item.Quantity</td>
                         <td>@item.TotalAmount.ToString("N2") руб.</td>
                         <td>@item.Commission.ToString("N2") руб.</td>
+                        <td>@item.LogisticsCost.ToString("N2") руб.</td> <!-- Добавила вывод логистики -->
                         <td class="text-success fw-bold">@item.NetProfit.ToString("N2") руб.</td>
                     </tr>
             }
