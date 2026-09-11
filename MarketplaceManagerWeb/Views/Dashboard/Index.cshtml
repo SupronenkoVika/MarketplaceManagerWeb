@@ -13,6 +13,24 @@
 <div class="container-fluid mt-4">
     <h1 class="mb-4">Главная панель</h1>
 
+    @if (ViewBag.LowStockAlerts != null && ((IEnumerable<MarketplaceManagerWeb.Models.Product>)ViewBag.LowStockAlerts).Any())
+    {
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+            <h5 class="alert-heading">⚠️ Внимание! Заканчивается товар на складе:</h5>
+            <ul class="mb-0">
+                @foreach (var product in (IEnumerable<MarketplaceManagerWeb.Models.Product>)ViewBag.LowStockAlerts)
+                {
+                        <li>
+                            <strong>@product.ProductName</strong> (Артикул: @product.ProductArticle) — 
+                            осталось <span class="badge bg-danger">@product.Stock шт.</span>
+                            <a href="/Products/Edit/@product.ProductID" class="ms-2 small">Пополнить →</a>
+                        </li>
+                }
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- Карточки с ключевыми показателями -->
     <div class="row mb-4">
         <div class="col-md-3">

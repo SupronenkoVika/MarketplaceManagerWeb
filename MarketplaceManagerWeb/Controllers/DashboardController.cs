@@ -69,6 +69,14 @@ namespace MarketplaceManagerWeb.Controllers
                 .Take(10)
                 .ToListAsync();
 
+            var lowStockAlerts = await _context.Products
+                .Where(p => p.Stock <= 5)
+                .OrderBy(p => p.Stock)
+                .Take(5)
+                .ToListAsync();
+
+            ViewBag.LowStockAlerts = lowStockAlerts;
+
             return View(recentSales);
         }
     }

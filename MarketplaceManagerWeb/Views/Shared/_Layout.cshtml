@@ -35,6 +35,10 @@
         <a class="nav-link text-dark" asp-controller="Reports" asp-action="Index">Отчеты</a>
     </li>
 </ul>
+<!-- ДОБАВЛЯЕМ КОЛОКОЛЬЧИК УВЕДОМЛЕНИЙ СПРАВА -->
+<ul class="navbar-nav">
+                        @await Component.InvokeAsync("Notifications")
+</ul>
         </div>
     </div>
 </nav>
