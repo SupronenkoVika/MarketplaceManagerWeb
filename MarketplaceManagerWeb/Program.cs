@@ -1,40 +1,47 @@
 using MarketplaceManagerWeb.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-namespace MarketplaceManagerWeb
-{
-    public class Program
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. Подключение базы данных
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 2. Настройка аутентификации (Cookie)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/Login";
+    });
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+// 3. Настройка авторизации
+builder.Services.AddAuthorization();
 
-            var app = builder.Build();
+// 4. Добавление сервисов MVC
+builder.Services.AddControllersWithViews();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+var app = builder.Build();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
-        }
-    }
+// 5. Настройка конвейера обработки запросов (Middleware)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+// ВАЖНО: Строгий порядок ниже!
+app.UseRouting();             // Сначала определяем маршрут
+app.UseAuthentication();      // Потом проверяем, кто это (аутентификация)
+app.UseAuthorization();       // Потом проверяем, есть ли у него права (авторизация)
+
+// 6. Маршрутизация контроллеров (сделаем Auth стартовой страницей)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+app.Run();

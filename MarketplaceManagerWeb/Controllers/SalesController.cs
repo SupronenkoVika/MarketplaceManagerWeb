@@ -1,10 +1,12 @@
 ﻿using MarketplaceManagerWeb.Data;
 using MarketplaceManagerWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarketplaceManagerWeb.Controllers
 {
+    [Authorize]
     public class SalesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -57,11 +59,16 @@ namespace MarketplaceManagerWeb.Controllers
                 // Получаем данные о товаре, маркетплейсе и менеджере
                 var product = await _context.Products.FindAsync(sale.ProductID);
                 var marketplace = await _context.Marketplaces.FindAsync(sale.MarketplaceID);
-                var manager = await _context.Managers.FindAsync(sale.ManagerID);
-
-                if (product == null || marketplace == null || manager == null)
+                var managerIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(managerIdString) || !int.TryParse(managerIdString, out int managerId))
                 {
-                    ModelState.AddModelError("", "Товар, маркетплейс или менеджер не найдены");
+                    return RedirectToAction("Login", "Auth");
+                }
+                sale.ManagerID = managerId;
+
+                if (product == null || marketplace == null)
+                {
+                    ModelState.AddModelError("", "Товар или маркетплейс не найдены");
                     return View(sale);
                 }
 
