@@ -1,0 +1,77 @@
+﻿@model IEnumerable<MarketplaceManagerWeb.Models.Product>
+
+@{
+    ViewData["Title"] = "Товары";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Справочник товаров</h1>
+        <a asp-action="Create" class="btn btn-primary">+ Добавить товар</a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+            <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+    }
+
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="searchString" value="@ViewBag.SearchString"
+                   class="form-control" placeholder="Поиск по названию или артикулу..." />
+            <button type="submit" class="btn btn-outline-secondary">Найти</button>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+            {
+                    <a asp-action="Index" class="btn btn-outline-danger">Сбросить</a>
+            }
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Артикул</th>
+                <th>Наименование</th>
+                <th>Цена</th>
+                <th>Остаток</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                    <tr>
+                        <td><code>@item.ProductArticle</code></td>
+                        <td>@item.ProductName</td>
+                        <td>@item.Price.ToString("N2") руб.</td>
+                        <td>
+                        @if (item.Stock <= 5)
+                        {
+                                    <span class="badge bg-danger">@item.Stock (мало!)</span>
+                        }
+                        else if (item.Stock <= 20)
+                        {
+                                    <span class="badge bg-warning text-dark">@item.Stock</span>
+                        }
+                        else
+                        {
+                                    <span class="badge bg-success">@item.Stock</span>
+                        }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-primary">Изменить</a>
+                            <a asp-action="Delete" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-danger">Удалить</a>
+                        </td>
+                    </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+            <div class="alert alert-info">Товаров пока нет.</div>
+    }
+</div>

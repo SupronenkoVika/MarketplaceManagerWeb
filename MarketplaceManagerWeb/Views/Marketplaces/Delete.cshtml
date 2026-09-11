@@ -1,0 +1,23 @@
+﻿@model MarketplaceManagerWeb.Models.Marketplace
+
+@{
+    ViewData["Title"] = "Удалить маркетплейс";
+}
+
+<div class="container mt-4">
+    <h1>Удалить маркетплейс</h1>
+    <h3 class="text-danger">Вы уверены, что хотите удалить этот маркетплейс?</h3>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Название</dt>
+        <dd class="col-sm-9">@Model.MarketplaceName</dd>
+        <dt class="col-sm-3">Комиссия</dt>
+        <dd class="col-sm-9">@Model.CommissionRate%</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="MarketplaceID" />
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>

@@ -1,0 +1,173 @@
+﻿@model IEnumerable<MarketplaceManagerWeb.Models.Sale>
+
+@{
+    ViewData["Title"] = "Главная панель";
+    var marketplaceLabels = ViewBag.MarketplaceLabels as string[] ?? Array.Empty<string>();
+    var marketplaceCounts = ViewBag.MarketplaceCounts as int[] ?? Array.Empty<int>();
+    var marketplaceRevenues = ViewBag.MarketplaceRevenues as decimal[] ?? Array.Empty<decimal>();
+    var dailyLabels = ViewBag.DailyLabels as string[] ?? Array.Empty<string>();
+    var dailyRevenues = ViewBag.DailyRevenues as decimal[] ?? Array.Empty<decimal>();
+    var dailyProfits = ViewBag.DailyProfits as decimal[] ?? Array.Empty<decimal>();
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Главная панель</h1>
+
+    <!-- Карточки с ключевыми показателями -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Всего продаж</h5>
+                    <h2 class="mb-0">@ViewBag.TotalSales</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Общая выручка</h5>
+                    <h2 class="mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) ₽</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Чистая прибыль</h5>
+                    <h2 class="mb-0">@(((decimal)ViewBag.TotalProfit).ToString("N0")) ₽</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Комиссии</h5>
+                    <h2 class="mb-0">@(((decimal)ViewBag.TotalCommission).ToString("N0")) ₽</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Графики -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Продажи по маркетплейсам</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="marketplaceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Динамика продаж (последние 30 дней)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние продажи -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Последние продажи</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Товар</th>
+                        <th>Маркетплейс</th>
+                        <th>Менеджер</th>
+                        <th>Кол-во</th>
+                        <th>Сумма</th>
+                        <th>Прибыль</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var sale in Model)
+                    {
+                            <tr>
+                                <td>@sale.SaleDate.ToString("dd.MM.yyyy")</td>
+                                <td>@sale.Product?.ProductName</td>
+                                <td>@sale.Marketplace?.MarketplaceName</td>
+                                <td>@sale.Manager?.ManagerFName @sale.Manager?.ManagerLName</td>
+                                <td>@sale.Quantity</td>
+                                <td>@sale.TotalAmount.ToString("N2") ₽</td>
+                                <td class="text-success fw-bold">@sale.NetProfit.ToString("N2") ₽</td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+            @if (!Model.Any())
+            {
+                    <p class="text-muted text-center">Продаж пока нет</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            // Круговая диаграмма по маркетплейсам
+            const marketplaceCtx = document.getElementById('marketplaceChart').getContext('2d');
+            new Chart(marketplaceCtx, {
+                type: 'pie',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(marketplaceLabels)),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(marketplaceCounts)),
+                        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Линейный график динамики продаж
+            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(dailyLabels)),
+                    datasets: [
+                        {
+                            label: 'Выручка',
+                            data: @Html.Raw(Json.Serialize(dailyRevenues)),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Прибыль',
+                            data: @Html.Raw(Json.Serialize(dailyProfits)),
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+}

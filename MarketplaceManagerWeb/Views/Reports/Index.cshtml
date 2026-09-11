@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Отчеты";
+}
+
+<div class="container mt-4">
+    <h1>Формирование отчетов</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Выберите тип отчета</h5>
+                </div>
+                <div class="card-body">
+                    <form id="reportForm" method="post">
+                        @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Период с:</label>
+        <input type="date" name="startDate" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Период по:</label>
+        <input type="date" name="endDate" class="form-control" />
+    </div>
+
+    <div class="d-grid gap-2">
+        <button type="submit" formaction="/Reports/Managers" class="btn btn-primary">
+            Отчет по менеджерам
+        </button>
+        <button type="submit" formaction="/Reports/Marketplaces" class="btn btn-success">
+            Отчет по маркетплейсам
+        </button>
+        <button type="submit" formaction="/Reports/Products" class="btn btn-info text-white">
+            Отчет по товарам
+        </button>
+    </div>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

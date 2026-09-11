@@ -1,0 +1,27 @@
+﻿@model MarketplaceManagerWeb.Models.Product
+
+@{
+    ViewData["Title"] = "Удалить товар";
+}
+
+<div class="container mt-4">
+    <h1>Удалить товар</h1>
+    <h3 class="text-danger">Вы уверены, что хотите удалить этот товар?</h3>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Артикул</dt>
+        <dd class="col-sm-9">@Model.ProductArticle</dd>
+        <dt class="col-sm-3">Наименование</dt>
+        <dd class="col-sm-9">@Model.ProductName</dd>
+        <dt class="col-sm-3">Цена</dt>
+        <dd class="col-sm-9">@Model.Price.ToString("N2") руб.</dd>
+        <dt class="col-sm-3">Остаток</dt>
+        <dd class="col-sm-9">@Model.Stock</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ProductID" />
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
