@@ -1,0 +1,65 @@
+﻿@model IEnumerable<MarketplaceManagerWeb.Models.Manager>
+
+@{
+    ViewData["Title"] = "Управление менеджерами";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>👥 Управление менеджерами</h1>
+        <a asp-action="Create" class="btn btn-primary">+ Добавить менеджера</a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+            <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ФИО</th>
+                        <th>Логин</th>
+                        <th>Роль</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                            <tr>
+                                <td>
+                                    <strong>@item.ManagerLName @item.ManagerFName @item.ManagerMName</strong>
+                                </td>
+                                <td><code>@item.ManagerLog</code></td>
+                                <td>
+                                @if (item.ManagerIsAdmin)
+                                {
+                                            <span class="badge bg-danger">Администратор</span>
+                                }
+                                else
+                                {
+                                            <span class="badge bg-secondary">Менеджер</span>
+                                }
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.ManagerID" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                    <a asp-action="Delete" asp-route-id="@item.ManagerID" class="btn btn-sm btn-outline-danger">Удалить</a>
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                    <p class="text-muted text-center py-3">Менеджеров пока нет. Добавьте первого!</p>
+            }
+        </div>
+    </div>
+</div>

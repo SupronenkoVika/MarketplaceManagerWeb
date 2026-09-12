@@ -34,18 +34,41 @@
     <li class="nav-item">
         <a class="nav-link text-dark" asp-controller="Reports" asp-action="Index">Отчеты</a>
     </li>
+    <!-- Ссылка только для администраторов -->
+                        @if (User.IsInRole("Admin"))
+                        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Managers" asp-action="Index"> Менеджеры</a>
+            </li>
+                        }
 </ul>
 <!-- ДОБАВЛЯЕМ КОЛОКОЛЬЧИК УВЕДОМЛЕНИЙ СПРАВА -->
 <ul class="navbar-nav">
                         @await Component.InvokeAsync("Notifications")
 
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
-            <li class="nav-item d-flex align-items-center ms-3">
-                <span class="text-muted me-2">👤 @User.Identity.Name</span>
-                <form method="post" asp-controller="Auth" asp-action="Logout" class="d-inline">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Выйти</button>
-                </form>
+            <li class="nav-item dropdown ms-3">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    👤 @User.Identity.Name 
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                            <span class="badge bg-danger ms-2" style="font-size: 0.7em;">Админ</span>
+                                    }
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                    <li>
+                        <a class="dropdown-item" asp-controller="Profile" asp-action="ChangePassword">
+                            🔑 Сменить пароль
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="post" asp-controller="Auth" asp-action="Logout" class="d-inline">
+                            <button type="submit" class="dropdown-item text-danger">🚪 Выйти</button>
+                        </form>
+                    </li>
+                </ul>
             </li>
                         }
 </ul>

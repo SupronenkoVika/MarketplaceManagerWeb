@@ -1,0 +1,62 @@
+﻿@model IEnumerable<MarketplaceManagerWeb.Models.PriceHistory>
+
+@{
+    ViewData["Title"] = "История изменений: " + ViewBag.ProductName;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1> История изменений: <span class="text-primary">@ViewBag.ProductName</span></h1>
+        <a asp-action="Index" class="btn btn-secondary">← Назад к товарам</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Дата и время</th>
+                                <th>Кто изменил</th>
+                                <th>Старая цена</th>
+                                <th>Новая цена</th>
+                                <th>Старая себестоимость</th>
+                                <th>Новая себестоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td>@item.ChangedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>
+                                    @if (item.ChangedByManager != null)
+                                    {
+                                                    <span class="badge bg-secondary">
+                                            @item.ChangedByManager.ManagerLName @item.ChangedByManager.ManagerFName[0].
+                                                    </span>
+                                    }
+                                    else
+                                    {
+                                                    <span class="text-muted">Система</span>
+                                    }
+                                        </td>
+                                        <td class="text-muted text-decoration-line-through">@item.OldPrice?.ToString("N2") ₽</td>
+                                        <td class="fw-bold text-success">@item.NewPrice?.ToString("N2") ₽</td>
+                                        <td class="text-muted text-decoration-line-through">@item.OldCostPrice?.ToString("N2") ₽</td>
+                                        <td class="fw-bold text-danger">@item.NewCostPrice?.ToString("N2") ₽</td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <div class="alert alert-info text-center">
+                        ℹ️ История изменений для этого товара пока пуста.
+                    </div>
+            }
+        </div>
+    </div>
+</div>

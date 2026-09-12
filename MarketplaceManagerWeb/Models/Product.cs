@@ -29,5 +29,11 @@ namespace MarketplaceManagerWeb.Models
 
         [Required]
         public int Stock { get; set; }
+
+        // Навигационное свойство
+        public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+
+        // Навигационное свойство для истории цен
+        public virtual ICollection<PriceHistory> PriceHistory { get; set; } = new List<PriceHistory>();
     }
 }

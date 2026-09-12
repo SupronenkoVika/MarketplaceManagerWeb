@@ -2,66 +2,34 @@
 
 @{
     ViewData["Title"] = "Главная панель";
-    var marketplaceLabels = ViewBag.MarketplaceLabels as string[] ?? Array.Empty<string>();
-    var marketplaceCounts = ViewBag.MarketplaceCounts as int[] ?? Array.Empty<int>();
-    var marketplaceRevenues = ViewBag.MarketplaceRevenues as decimal[] ?? Array.Empty<decimal>();
-    var dailyLabels = ViewBag.DailyLabels as string[] ?? Array.Empty<string>();
-    var dailyRevenues = ViewBag.DailyRevenues as decimal[] ?? Array.Empty<decimal>();
-    var dailyProfits = ViewBag.DailyProfits as decimal[] ?? Array.Empty<decimal>();
 }
 
 <div class="container-fluid mt-4">
-    <h1 class="mb-4">Главная панель</h1>
-
-    @if (ViewBag.LowStockAlerts != null && ((IEnumerable<MarketplaceManagerWeb.Models.Product>)ViewBag.LowStockAlerts).Any())
-    {
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <h5 class="alert-heading">⚠️ Внимание! Заканчивается товар на складе:</h5>
-            <ul class="mb-0">
-                @foreach (var product in (IEnumerable<MarketplaceManagerWeb.Models.Product>)ViewBag.LowStockAlerts)
-                {
-                        <li>
-                            <strong>@product.ProductName</strong> (Артикул: @product.ProductArticle) — 
-                            осталось <span class="badge bg-danger">@product.Stock шт.</span>
-                            <a href="/Products/Edit/@product.ProductID" class="ms-2 small">Пополнить →</a>
-                        </li>
-                }
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <h1 class="mb-4">📊 Главная панель аналитики</h1>
 
     <!-- Карточки с ключевыми показателями -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Всего продаж</h5>
+                    <h6 class="card-title text-uppercase">Всего продаж</h6>
                     <h2 class="mb-0">@ViewBag.TotalSales</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success">
+        <div class="col-md-4">
+            <div class="card text-white bg-success shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Общая выручка</h5>
+                    <h6 class="card-title text-uppercase">Общая выручка</h6>
                     <h2 class="mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) ₽</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info">
+        <div class="col-md-4">
+            <div class="card text-white bg-info shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Чистая прибыль</h5>
+                    <h6 class="card-title text-uppercase">Чистая прибыль</h6>
                     <h2 class="mb-0">@(((decimal)ViewBag.TotalProfit).ToString("N0")) ₽</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">Комиссии</h5>
-                    <h2 class="mb-0">@(((decimal)ViewBag.TotalCommission).ToString("N0")) ₽</h2>
                 </div>
             </div>
         </div>
@@ -69,120 +37,140 @@
 
     <!-- Графики -->
     <div class="row mb-4">
+        <!-- График 1: По дням в штуках -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Продажи по маркетплейсам</h5>
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📈 Продажи по дням (в штуках, за 30 дней)</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="marketplaceChart"></canvas>
+                    <canvas id="dailyQtyChart"></canvas>
                 </div>
             </div>
         </div>
+
+        <!-- График 2: По маркетплейсам в штуках -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Динамика продаж (последние 30 дней)</h5>
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🏪 Продажи по маркетплейсам (в штуках)</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="dailyChart"></canvas>
+                    <canvas id="marketplaceQtyChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Последние продажи -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Последние продажи</h5>
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">🕒 Последние продажи</h5>
         </div>
         <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>Товар</th>
-                        <th>Маркетплейс</th>
-                        <th>Менеджер</th>
-                        <th>Кол-во</th>
-                        <th>Сумма</th>
-                        <th>Прибыль</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var sale in Model)
-                    {
-                            <tr>
-                                <td>@sale.SaleDate.ToString("dd.MM.yyyy")</td>
-                                <td>@sale.Product?.ProductName</td>
-                                <td>@sale.Marketplace?.MarketplaceName</td>
-                                <td>@sale.Manager?.ManagerFName @sale.Manager?.ManagerLName</td>
-                                <td>@sale.Quantity</td>
-                                <td>@sale.TotalAmount.ToString("N2") ₽</td>
-                                <td class="text-success fw-bold">@sale.NetProfit.ToString("N2") ₽</td>
-                            </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Товар</th>
+                            <th>Маркетплейс</th>
+                            <th>Менеджер</th>
+                            <th>Кол-во</th>
+                            <th>Прибыль</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sale in Model)
+                        {
+                                <tr>
+                                    <td>@sale.SaleDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@sale.Product?.ProductName</td>
+                                    <td><span class="badge bg-secondary">@sale.Marketplace?.MarketplaceName</span></td>
+                                    <td>@sale.Manager?.ManagerFName @sale.Manager?.ManagerLName</td>
+                                    <td class="fw-bold">@sale.Quantity шт.</td>
+                                    <td class="text-success fw-bold">@sale.NetProfit.ToString("N2") ₽</td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
             @if (!Model.Any())
             {
-                    <p class="text-muted text-center">Продаж пока нет</p>
+                    <p class="text-muted text-center py-3">Продаж пока нет. Добавьте первую продажу!</p>
             }
         </div>
     </div>
 </div>
 
 @section Scripts {
+        <!-- Подключаем Chart.js, если он еще не подключен в _Layout.cshtml -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
         <script>
-            // Круговая диаграмма по маркетплейсам
-            const marketplaceCtx = document.getElementById('marketplaceChart').getContext('2d');
-            new Chart(marketplaceCtx, {
-                type: 'pie',
+            // Получаем данные из ViewBag с безопасной обработкой null
+            const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.DailyQtyLabels ?? Array.Empty<string>()));
+            const dailyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.DailyQuantities ?? Array.Empty<int>()));
+
+            const mpLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MarketplaceQtyLabels ?? Array.Empty<string>()));
+            const mpData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MarketplaceQuantities ?? Array.Empty<int>()));
+
+            // 1. График продаж по дням (Столбчатая диаграмма)
+            const dailyCtx = document.getElementById('dailyQtyChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'bar',
                 data: {
-                    labels: @Html.Raw(Json.Serialize(marketplaceLabels)),
+                    labels: dailyLabels,
                     datasets: [{
-                        data: @Html.Raw(Json.Serialize(marketplaceCounts)),
-                        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                        label: 'Продано (шт.)',
+                        data: dailyData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 } // Только целые числа
                         }
+                    },
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
             });
 
-            // Линейный график динамики продаж
-            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
-            new Chart(dailyCtx, {
-                type: 'line',
+            // 2. График продаж по маркетплейсам (Кольцевая диаграмма)
+            const mpCtx = document.getElementById('marketplaceQtyChart').getContext('2d');
+            new Chart(mpCtx, {
+                type: 'doughnut',
                 data: {
-                    labels: @Html.Raw(Json.Serialize(dailyLabels)),
-                    datasets: [
-                        {
-                            label: 'Выручка',
-                            data: @Html.Raw(Json.Serialize(dailyRevenues)),
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Прибыль',
-                            data: @Html.Raw(Json.Serialize(dailyProfits)),
-                            borderColor: '#007bff',
-                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                            tension: 0.4
-                        }
-                    ]
+                    labels: mpLabels,
+                    datasets: [{
+                        data: mpData,
+                        backgroundColor: [
+                            '#FF6384', // Wildberries (розовый)
+                            '#36A2EB', // Ozon (синий)
+                            '#FFCE56', // Яндекс (желтый)
+                            '#4BC0C0', // Другие
+                            '#9966FF'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
                 },
                 options: {
                     responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { padding: 20 }
                         }
                     }
                 }

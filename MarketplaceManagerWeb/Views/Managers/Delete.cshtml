@@ -1,0 +1,58 @@
+﻿@model MarketplaceManagerWeb.Models.Manager
+
+@{
+    ViewData["Title"] = "Удалить менеджера";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">⚠️ Удаление менеджера</h4>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.HasSales)
+                    {
+                            <div class="alert alert-warning">
+                                <strong>Внимание!</strong> У этого менеджера есть продажи в системе. Удаление невозможно, чтобы сохранить целостность данных.
+                            </div>
+                    }
+                    else
+                    {
+                            <h5 class="text-danger">Вы уверены, что хотите удалить этого менеджера?</h5>
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-4">ФИО</dt>
+                                <dd class="col-sm-8">@Model.ManagerLName @Model.ManagerFName @Model.ManagerMName</dd>
+                                <dt class="col-sm-4">Логин</dt>
+                                <dd class="col-sm-8"><code>@Model.ManagerLog</code></dd>
+                                <dt class="col-sm-4">Роль</dt>
+                                <dd class="col-sm-8">
+                                @if (Model.ManagerIsAdmin)
+                                {
+                                            <span class="badge bg-danger">Администратор</span>
+                                }
+                                else
+                                {
+                                            <span class="badge bg-secondary">Менеджер</span>
+                                }
+                                </dd>
+                            </dl>
+                    }
+
+                    <div class="d-flex gap-2">
+                        @if (!ViewBag.HasSales)
+                        {
+                                <form asp-action="Delete">
+                                    <input type="hidden" asp-for="ManagerID" />
+                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                </form>
+                        }
+                        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -32,6 +32,13 @@
                 </div>
 
                 <div class="mb-3">
+    <label asp-for="CostPrice" class="control-label">Себестоимость (руб.)</label>
+    <input asp-for="CostPrice" class="form-control" type="number" step="0.01" min="0" />
+    <span asp-validation-for="CostPrice" class="text-danger"></span>
+    <small class="form-text text-muted">Закупочная цена товара. Изменение будет записано в историю.</small>
+</div>
+
+                <div class="mb-3">
                     <label asp-for="Stock" class="control-label">Остаток на складе</label>
                     <input asp-for="Stock" class="form-control" type="number" min="0" />
                     <span asp-validation-for="Stock" class="text-danger"></span>

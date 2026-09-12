@@ -22,5 +22,8 @@ namespace MarketplaceManagerWeb.Models
         [Column(TypeName = "decimal(10,2)")]
         [Display(Name = "Стоимость логистики (руб.)")]
         public decimal LogisticsCost { get; set; } = 0;
+
+        // Навигационное свойство
+        public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
     }
 }

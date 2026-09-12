@@ -14,5 +14,6 @@ namespace MarketplaceManagerWeb.Data
         public DbSet<Marketplace> Marketplaces { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Sale> Sales { get; set; }
+        public DbSet<PriceHistory> PriceHistory { get; set; }
     }
 }

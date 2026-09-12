@@ -31,5 +31,8 @@ namespace MarketplaceManagerWeb.Models
         public string ManagerPass { get; set; } = string.Empty;
 
         public bool ManagerIsAdmin { get; set; } = false;
+
+        // Навигационное свойство - связь с таблицей Sales
+        public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
     }
 }

@@ -17,67 +17,53 @@ namespace MarketplaceManagerWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Общие показатели
+            // 1. Общие финансовые показатели
             var totalSales = await _context.Sales.CountAsync();
             var totalRevenue = await _context.Sales.SumAsync(s => (decimal?)s.TotalAmount) ?? 0;
             var totalProfit = await _context.Sales.SumAsync(s => (decimal?)s.NetProfit) ?? 0;
-            var totalCommission = await _context.Sales.SumAsync(s => (decimal?)s.Commission) ?? 0;
 
             ViewBag.TotalSales = totalSales;
             ViewBag.TotalRevenue = totalRevenue;
             ViewBag.TotalProfit = totalProfit;
-            ViewBag.TotalCommission = totalCommission;
 
-            // Продажи по маркетплейсам (для круговой диаграммы)
-            var salesByMarketplace = await _context.Sales
-                .GroupBy(s => s.Marketplace.MarketplaceName)
-                .Select(g => new
-                {
-                    Marketplace = g.Key,
-                    Count = g.Count(),
-                    Revenue = g.Sum(s => s.TotalAmount)
-                })
-                .OrderByDescending(x => x.Revenue)
-                .ToListAsync();
-
-            ViewBag.MarketplaceLabels = salesByMarketplace.Select(x => x.Marketplace).ToArray();
-            ViewBag.MarketplaceCounts = salesByMarketplace.Select(x => x.Count).ToArray();
-            ViewBag.MarketplaceRevenues = salesByMarketplace.Select(x => x.Revenue).ToArray();
-
-            // Динамика продаж за последние 30 дней
+            // 2. Динамика продаж по дням (в ШТУКАХ) за последние 30 дней
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
-            var dailySales = await _context.Sales
+            var dailySalesQuantities = await _context.Sales
                 .Where(s => s.SaleDate >= thirtyDaysAgo)
                 .GroupBy(s => s.SaleDate.Date)
                 .Select(g => new
                 {
                     Date = g.Key,
-                    Revenue = g.Sum(s => s.TotalAmount),
-                    Profit = g.Sum(s => s.NetProfit)
+                    Quantity = g.Sum(s => s.Quantity)
                 })
                 .OrderBy(x => x.Date)
                 .ToListAsync();
 
-            ViewBag.DailyLabels = dailySales.Select(x => x.Date.ToString("dd.MM")).ToArray();
-            ViewBag.DailyRevenues = dailySales.Select(x => x.Revenue).ToArray();
-            ViewBag.DailyProfits = dailySales.Select(x => x.Profit).ToArray();
+            ViewBag.DailyQtyLabels = dailySalesQuantities.Select(x => x.Date.ToString("dd.MM")).ToArray();
+            ViewBag.DailyQuantities = dailySalesQuantities.Select(x => x.Quantity).ToArray();
 
-            // Последние 10 продаж
+            // 3. Продажи по маркетплейсам (в ШТУКАХ)
+            var marketplaceSalesQuantities = await _context.Sales
+                .GroupBy(s => s.Marketplace.MarketplaceName)
+                .Select(g => new
+                {
+                    Marketplace = g.Key,
+                    Quantity = g.Sum(s => s.Quantity)
+                })
+                .OrderByDescending(x => x.Quantity)
+                .ToListAsync();
+
+            ViewBag.MarketplaceQtyLabels = marketplaceSalesQuantities.Select(x => x.Marketplace).ToArray();
+            ViewBag.MarketplaceQuantities = marketplaceSalesQuantities.Select(x => x.Quantity).ToArray();
+
+            // 4. Последние 5 продаж для таблицы
             var recentSales = await _context.Sales
                 .Include(s => s.Product)
                 .Include(s => s.Marketplace)
                 .Include(s => s.Manager)
                 .OrderByDescending(s => s.SaleDate)
-                .Take(10)
-                .ToListAsync();
-
-            var lowStockAlerts = await _context.Products
-                .Where(p => p.Stock <= 5)
-                .OrderBy(p => p.Stock)
                 .Take(5)
                 .ToListAsync();
-
-            ViewBag.LowStockAlerts = lowStockAlerts;
 
             return View(recentSales);
         }

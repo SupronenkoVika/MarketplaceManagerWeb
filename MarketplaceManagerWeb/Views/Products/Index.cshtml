@@ -7,7 +7,10 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Справочник товаров</h1>
-        <a asp-action="Create" class="btn btn-primary">+ Добавить товар</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary">+ Добавить товар</a>
+        }
     </div>
 
     @if (TempData["Error"] != null)
@@ -63,10 +66,19 @@
                             <span class="badge bg-success">@item.Stock</span>
                         }
                 </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-primary">Изменить</a>
-                    <a asp-action="Delete" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-danger">Удалить</a>
-                </td>
+                    <td>
+                        @if (User.IsInRole("Admin"))
+                        {
+                <a asp-action="Edit" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-primary">Изменить</a>
+                <a asp-action="Delete" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-danger">Удалить</a>
+                        }
+                        else
+                        {
+                <span class="text-muted small">Только просмотр</span>
+                        }
+                                <a asp-action="PriceHistory" asp-route-id="@item.ProductID" class="btn btn-sm btn-outline-info" title="История изменений">📜</a>
+
+    </td>
             </tr>
             }
 </tbody>

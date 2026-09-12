@@ -10,28 +10,27 @@ namespace MarketplaceManagerWeb.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SaleID { get; set; }
 
-        [Required(ErrorMessage = "Дата продажи обязательна")]
+        [Required]
         [DataType(DataType.Date)]
-        [Display(Name = "Дата продажи")]
         public DateTime SaleDate { get; set; }
 
         [Required]
         public int ManagerID { get; set; }
 
         [ForeignKey("ManagerID")]
-        public Manager? Manager { get; set; }
+        public virtual Manager? Manager { get; set; }
 
         [Required]
         public int ProductID { get; set; }
 
         [ForeignKey("ProductID")]
-        public Product? Product { get; set; }
+        public virtual Product? Product { get; set; }
 
         [Required]
         public int MarketplaceID { get; set; }
 
         [ForeignKey("MarketplaceID")]
-        public Marketplace? Marketplace { get; set; }
+        public virtual Marketplace? Marketplace { get; set; }
 
         [Required]
         public int Quantity { get; set; }
